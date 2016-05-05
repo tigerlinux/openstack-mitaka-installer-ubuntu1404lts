@@ -77,6 +77,12 @@ export DEBIAN_FRONTEND=noninteractive
 #
 kvm_possible=`grep -E 'svm|vmx' /proc/cpuinfo|uniq|wc -l`
 
+if [ $forceqemu == "yes" ]
+then
+        $kvm_possible="0"
+fi
+
+
 if [ $kvm_possible == "0" ]
 then
 	nova_kvm_or_qemu="nova-compute-qemu"

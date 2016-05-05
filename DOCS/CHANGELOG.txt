@@ -1,3 +1,8 @@
+1.0.1.ub1404lts - May 05, 2016
+
+- Added "forceqemu" config option in order to force
+  qemu election instead of kvm in nova and ceilometer.
+
 1.0.0.ub1404lts - May 03, 2016
 
 - Firts stable version of our openstack Installer for MITAKA (Release 13).
@@ -21,4 +26,6 @@
   main config.
 - Main config moved to "sample-config" directory and documentation updated
   to let the user know the steps needed in order to use the installer.
+- OpenStack python CLI used by default in several modules. Only neutron
+  install module is still using neutron cli for automated network creation.
 
