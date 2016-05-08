@@ -356,6 +356,11 @@ echo ""
 echo "Glance Installed"
 echo ""
 
+echo ""
+echo "Loading extra metadata"
+glance-manage db_load_metadefs
+echo ""
+
 #
 # Finally, if we choose to do it, we provision Cirros TEST Images
 #

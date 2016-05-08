@@ -1,3 +1,10 @@
+1.0.2.ub1404lts - May 08, 2016
+
+- Added extra secuences in glance install module in
+  order to include extra metadata items.
+- Corrected some missing lines on "openstack vlans"
+  document in DOCS directory.
+
 1.0.1.ub1404lts - May 05, 2016
 
 - Added "forceqemu" config option in order to force
