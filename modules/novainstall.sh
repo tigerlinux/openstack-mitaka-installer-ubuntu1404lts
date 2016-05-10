@@ -79,7 +79,7 @@ kvm_possible=`grep -E 'svm|vmx' /proc/cpuinfo|uniq|wc -l`
 
 if [ $forceqemu == "yes" ]
 then
-        $kvm_possible="0"
+        kvm_possible="0"
 fi
 
 

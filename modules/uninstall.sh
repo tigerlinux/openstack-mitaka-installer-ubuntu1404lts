@@ -31,7 +31,11 @@ clear
 echo "Stopping and Deactivating OpenStack Services"
 
 /usr/local/bin/openstack-control.sh stop
-/usr/local/bin/openstack-control.sh disable
+# Note: Normally, we should do a "disable", but, we really don't want
+# those "override" files in /etc/init, so we do an "enable" after the
+# stop secuence to get rid of those files before we uninstall and clean
+# up everything
+/usr/local/bin/openstack-control.sh enable
 
 rm -rf /tmp/keystone-signing-*
 rm -rf /tmp/cd_gen_*
@@ -112,7 +116,8 @@ DEBIAN_FRONTEND=noninteractive aptitude -y purge virt-top ceilometer-agent-centr
 	qpid-tools qpid-doc qemu kvm qemu-kvm libvirt-bin libvirt-doc rabbitmq-server \
 	heat-api heat-api-cfn heat-engine neutron-plugin-ml2 python-guestfs heat-cfntools \
 	heat-common nova-spiceproxy nova-novncproxy python-trove python-troveclient trove-common \
-	trove-api trove-taskmanager sahara-common sahara
+	trove-api trove-taskmanager sahara-common sahara manila-api manila-scheduler python-manilaclient \
+	manila-share manila-common
 
 DEBIAN_FRONTEND=noninteractive aptitude -y purge python-openstack.nose-plugin  python-oslo.sphinx python-oslosphinx
 
@@ -128,6 +133,8 @@ DEBIAN_FRONTEND=noninteractive aptitude -y purge python-neutron-fwaas
 
 DEBIAN_FRONTEND=noninteractive aptitude -y purge python-hacking python-oslo-concurrency python-oslo-config python-osprofiler
 
+DEBIAN_FRONTEND=noninteractive apt-get -y clean
+DEBIAN_FRONTEND=noninteractive apt-get -y autoclean
 DEBIAN_FRONTEND=noninteractive apt-get -y autoremove
 
 rm -f /tmp/*-seed.txt
@@ -166,7 +173,8 @@ userdel -f -r swift
 userdel -r -f rabbitmq
 userdel -r -f heat
 userdel -r -f trove
-userdel -f -r aodh
+userdel -r -f aodh
+userdel -r -f manila
 
 echo "Deleting Remaining Files"
 
@@ -225,13 +233,16 @@ rm -fr  /etc/qpid \
 	/etc/aodh \
 	/var/log/aodh \
 	/var/lib/aodh \
+	/etc/manila \
+	/var/log/manila \
+	/var/lib/manila \
 	/root/keystonerc_*
 
 
-rm -fr /var/log/{keystone,glance,nova,neutron,cinder,ceilometer,heat,sahara,trove,aodh}*
-rm -fr /run/{keystone,glance,nova,neutron,cinder,ceilometer,heat,trove,sahara,aodh}*
-rm -fr /run/lock/{keystone,glance,nova,neutron,cinder,ceilometer,heat,trove,sahara,aodh}*
-rm -fr /root/.{keystone,glance,nova,neutron,cinder,ceilometer,heat,trove,sahara,aodh}client
+rm -fr /var/log/{keystone,glance,nova,neutron,cinder,ceilometer,heat,sahara,trove,aodh,manila}*
+rm -fr /run/{keystone,glance,nova,neutron,cinder,ceilometer,heat,trove,sahara,aodh,manila}*
+rm -fr /run/lock/{keystone,glance,nova,neutron,cinder,ceilometer,heat,trove,sahara,aodh,manila}*
+rm -fr /root/.{keystone,glance,nova,neutron,cinder,ceilometer,heat,trove,sahara,aodh,manila}client
 
 rm -f /etc/cron.d/openstack-monitor-crontab
 rm -f /etc/cron.d/ceilometer-expirer-crontab
@@ -348,6 +359,22 @@ then
 	echo "Cleaning Up Cinder Volume LV: $cinderlvmname"
 	lvremove -f $cinderlvmname 2>/dev/null
 fi
+
+if [ $manilacleanatuninstall == "yes" ]
+then
+        echo ""
+        echo "Cleaning Up Manila Volume LV: $manilavg"
+        lvremove -f $manilavg 2>/dev/null
+fi
+
+#
+# Final full clean-up:
+dpkg -l|grep ^rc|awk '{print $2}'|xargs apt-get -y purge
+dpkg -l|grep ^rc|awk '{print $2}'|xargs apt-get -y purge
+dpkg -l|grep ^rc|awk '{print $2}'|xargs apt-get -y purge
+DEBIAN_FRONTEND=noninteractive apt-get -y clean
+DEBIAN_FRONTEND=noninteractive apt-get -y autoclean
+DEBIAN_FRONTEND=noninteractive apt-get -y autoremove
 
 echo ""
 echo "OpenStack Uninstall Complete"

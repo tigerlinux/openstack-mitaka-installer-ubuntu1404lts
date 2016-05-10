@@ -244,6 +244,15 @@ sahara-engine
 "
 )
 
+# Manila. Index=10
+svcmanila=(
+"
+manila-api
+manila-scheduler
+manila-share
+"
+)
+
 #
 # Our Service Indexes:
 #
@@ -257,6 +266,7 @@ sahara-engine
 # Heat = 7
 # Trove = 8
 # Sahara = 9
+# Manila = 10
 #
 
 # Now, we create a super array with all services:
@@ -271,6 +281,7 @@ servicesstart=("${servicesstart[@]}" "${svcceilometer[@]}")	# Index 6 - Ceilomet
 servicesstart=("${servicesstart[@]}" "${svcheat[@]}")		# Index 7 - Heat
 servicesstart=("${servicesstart[@]}" "${svctrove[@]}")		# Index 8 - Trove
 servicesstart=("${servicesstart[@]}" "${svcsahara[@]}")		# Index 9 - Sahara
+servicesstart=("${servicesstart[@]}" "${svcmanila[@]}")         # Index 10 - Manila
 
 moduleliststart=""
 moduleliststop=""
@@ -333,6 +344,12 @@ fi
 if [ -f /etc/openstack-control-script-config/sahara ]
 then
 	moduleliststart="$moduleliststart 9"
+fi
+
+# Index 10 - Manila
+if [ -f /etc/openstack-control-script-config/manila ]
+then
+        moduleliststart="$moduleliststart 10"
 fi
 
 #
@@ -410,6 +427,13 @@ sahara)
 		moduleliststart="9"
 	fi
 	;;
+manila)
+        # Index 10
+        if [ -f /etc/openstack-control-script-config/manila ]
+        then
+                moduleliststart="10"
+        fi
+        ;;
 esac
 
 moduleliststop=`echo $moduleliststart|tac -s' '`

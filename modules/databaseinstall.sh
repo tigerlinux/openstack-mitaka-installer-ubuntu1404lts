@@ -68,6 +68,7 @@ then
 		# No more mysql - we'll use MariaDB !!
 		aptitude -y install mariadb-server-5.5 mariadb-client-5.5
 		sed -r -i 's/127\.0\.0\.1/0\.0\.0\.0/' /etc/mysql/my.cnf
+		sed -r -i 's/^\#.*max_connections.*/max_connections\ =\ 1000/' /etc/mysql/my.cnf
 		service mysql restart
 		update-rc.d mysql enable
 		sleep 5
@@ -95,6 +96,7 @@ then
 		echo "listen_addresses = '*'" >> /etc/postgresql/9.3/main/postgresql.conf
 		echo "port = 5432" >> /etc/postgresql/9.3/main/postgresql.conf
 		echo -e "host\tall\tall\t0.0.0.0 0.0.0.0\tmd5" >> /etc/postgresql/9.3/main/pg_hba.conf
+		sed -r -i 's/^max_connections.*/max_connections\ =\ 1000/' /etc/postgresql/9.3/main/postgresql.conf
 		/etc/init.d/postgresql restart
 		sleep 5
 		sync
@@ -320,6 +322,19 @@ then
 		sleep 5
 		sync
 
+		echo "Manila"
+		echo "CREATE DATABASE $maniladbname default character set utf8;"|$mysqlcommand
+		echo "GRANT ALL ON $maniladbname.* TO '$maniladbuser'@'%' IDENTIFIED BY '$maniladbpass';"|$mysqlcommand
+		echo "GRANT ALL ON $maniladbname.* TO '$maniladbuser'@'localhost' IDENTIFIED BY '$maniladbpass';"|$mysqlcommand
+		echo "GRANT ALL ON $maniladbname.* TO '$maniladbuser'@'$manilahost' IDENTIFIED BY '$maniladbpass';"|$mysqlcommand
+		for extrahost in $extramanilahosts
+		do
+			echo "GRANT ALL ON $maniladbname.* TO '$maniladbuser'@'$extrahost' IDENTIFIED BY '$maniladbpass';"|$mysqlcommand
+		done
+		echo "FLUSH PRIVILEGES;"|$mysqlcommand
+		sync
+		sleep 5
+		sync
 
 		echo ""
 		echo "Databases Created:"
@@ -426,11 +441,20 @@ then
                 sleep 5
                 sync
 
-		echo "Aodh"
+		echo "Aodh:"
 		echo "CREATE user $aodhdbuser;"|$psqlcommand
 		echo "ALTER user $aodhdbuser with password '$aodhdbpass'"|$psqlcommand
 		echo "CREATE DATABASE $aodhdbname"|$psqlcommand
 		echo "GRANT ALL PRIVILEGES ON database $aodhdbname TO $aodhdbuser;"|$psqlcommand
+		sync
+		sleep 5
+		sync
+
+		echo "Manila:"
+		echo "CREATE user $maniladbuser;"|$psqlcommand
+		echo "ALTER user $maniladbuser with password '$maniladbpass'"|$psqlcommand
+		echo "CREATE DATABASE $maniladbname"|$psqlcommand
+		echo "GRANT ALL PRIVILEGES ON database $maniladbname TO $maniladbuser;"|$psqlcommand
 		sync
 		sleep 5
 		sync

@@ -186,7 +186,10 @@ else
 	sed -i.ori 's/#listen_tls = 0/listen_tls = 0/g' /etc/libvirt/libvirtd.conf
 	sed -i 's/#listen_tcp = 1/listen_tcp = 1/g' /etc/libvirt/libvirtd.conf
 	sed -i 's/#auth_tcp = "sasl"/auth_tcp = "none"/g' /etc/libvirt/libvirtd.conf
-	sed -i.ori 's/libvirtd_opts="-d"/libvirtd_opts="-d -l"/g' /etc/default/libvirt-bin
+	# sed -i.ori 's/libvirtd_opts="-d"/libvirtd_opts="-d -l"/g' /etc/default/libvirt-bin
+	cat /etc/default/libvirt-bin > /etc/default/libvirt-bin.BACKUP
+	echo "start_libvirtd=\"yes\"" > /etc/default/libvirt-bin
+	echo "libvirtd_opts=\"-d -l\"" >> /etc/default/libvirt-bin
 
 	/etc/init.d/libvirt-bin restart
 
