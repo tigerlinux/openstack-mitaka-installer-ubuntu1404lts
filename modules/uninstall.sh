@@ -53,7 +53,21 @@ then
 	rm -rf 	/var/lib/mongodb /var/log/mongodb
 fi
 
-killall -9 dnsmasq
+# Some Sanity clean up
+killall -9 -u mongodb >/dev/null 2>&1
+killall -9 mongod >/dev/null 2>&1
+killall -9 dnsmasq >/dev/null 2>&1
+killall -9 -u neutron >/dev/null 2>&1
+killall -9 -u nova >/dev/null 2>&1
+killall -9 -u cinder >/dev/null 2>&1
+killall -9 -u designate >/dev/null 2>&1
+killall -9 -u glance >/dev/null 2>&1
+killall -9 -u trove >/dev/null 2>&1
+killall -9 -u sahara >/dev/null 2>&1
+killall -9 -u manila >/dev/null 2>&1
+killall -9 -u ceilometer >/dev/null 2>&1
+killall -9 -u aodh >/dev/null 2>&1
+killall -9 -u swift >/dev/null 2>&1
 
 echo ""
 echo "Erasing OpenStack Packages"
@@ -117,7 +131,11 @@ DEBIAN_FRONTEND=noninteractive aptitude -y purge virt-top ceilometer-agent-centr
 	heat-api heat-api-cfn heat-engine neutron-plugin-ml2 python-guestfs heat-cfntools \
 	heat-common nova-spiceproxy nova-novncproxy python-trove python-troveclient trove-common \
 	trove-api trove-taskmanager sahara-common sahara manila-api manila-scheduler python-manilaclient \
-	manila-share manila-common
+	manila-share manila-common designate designate-api designate-central designate-common designate-doc \
+	designate-mdns designate-pool-manager designate-sink designate-zone-manager python-designate
+
+DEBIAN_FRONTEND=noninteractive aptitude -y purge bind9
+rm -rf /etc/bind /var/cache/bind
 
 DEBIAN_FRONTEND=noninteractive aptitude -y purge python-openstack.nose-plugin  python-oslo.sphinx python-oslosphinx
 
@@ -175,6 +193,8 @@ userdel -r -f heat
 userdel -r -f trove
 userdel -r -f aodh
 userdel -r -f manila
+userdel -f -r designate
+userdel -f -r named
 
 echo "Deleting Remaining Files"
 
@@ -236,13 +256,16 @@ rm -fr  /etc/qpid \
 	/etc/manila \
 	/var/log/manila \
 	/var/lib/manila \
+	/etc/designate \
+	/var/lib/designate \
+	/var/log/designate \
 	/root/keystonerc_*
 
 
-rm -fr /var/log/{keystone,glance,nova,neutron,cinder,ceilometer,heat,sahara,trove,aodh,manila}*
-rm -fr /run/{keystone,glance,nova,neutron,cinder,ceilometer,heat,trove,sahara,aodh,manila}*
-rm -fr /run/lock/{keystone,glance,nova,neutron,cinder,ceilometer,heat,trove,sahara,aodh,manila}*
-rm -fr /root/.{keystone,glance,nova,neutron,cinder,ceilometer,heat,trove,sahara,aodh,manila}client
+rm -fr /var/log/{keystone,glance,nova,neutron,cinder,ceilometer,heat,sahara,trove,aodh,manila,designate}*
+rm -fr /run/{keystone,glance,nova,neutron,cinder,ceilometer,heat,trove,sahara,aodh,manila,designate}*
+rm -fr /run/lock/{keystone,glance,nova,neutron,cinder,ceilometer,heat,trove,sahara,aodh,manila,designate}*
+rm -fr /root/.{keystone,glance,nova,neutron,cinder,ceilometer,heat,trove,sahara,aodh,manila,designate}client
 
 rm -f /etc/cron.d/openstack-monitor-crontab
 rm -f /etc/cron.d/ceilometer-expirer-crontab
