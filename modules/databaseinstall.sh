@@ -68,7 +68,7 @@ then
 		# No more mysql - we'll use MariaDB !!
 		aptitude -y install mariadb-server-5.5 mariadb-client-5.5
 		sed -r -i 's/127\.0\.0\.1/0\.0\.0\.0/' /etc/mysql/my.cnf
-		sed -r -i 's/^\#.*max_connections.*/max_connections\ =\ 1000/' /etc/mysql/my.cnf
+		sed -r -i "s/^\#.*max_connections.*/max_connections\ =\ $dbmaxcons/" /etc/mysql/my.cnf
 		service mysql restart
 		update-rc.d mysql enable
 		sleep 5
@@ -96,7 +96,7 @@ then
 		echo "listen_addresses = '*'" >> /etc/postgresql/9.3/main/postgresql.conf
 		echo "port = 5432" >> /etc/postgresql/9.3/main/postgresql.conf
 		echo -e "host\tall\tall\t0.0.0.0 0.0.0.0\tmd5" >> /etc/postgresql/9.3/main/pg_hba.conf
-		sed -r -i 's/^max_connections.*/max_connections\ =\ 1000/' /etc/postgresql/9.3/main/postgresql.conf
+		sed -r -i "s/^max_connections.*/max_connections\ =\ $dbmaxcons/" /etc/postgresql/9.3/main/postgresql.conf
 		/etc/init.d/postgresql restart
 		sleep 5
 		sync
